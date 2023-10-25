@@ -2,38 +2,21 @@
 
 import pickle
 import sklearn
+from flask import Flask
 
 model_data = 'model_C1.bin'
 
 with open (model_data, 'rb') as f_in:
     dv, model = pickle.load( f_in)
 
-customer = {
-    'customerid': '3454-jfubc',
-    'gender':  'male',
-    'seniorcitizen': 1,
-    'partner': 'no',
-    'dependents': 'no',
-    'tenure': 68,
-    'phoneservice': 'yes',
-    'multiplelines': 'no',
-    'internetservice': 'no',
-    'onlinesecurity': 'no_internet_service',
-    'onlinebackup': 'no_internet_service',
-    'deviceprotection': 'no_internet_service',
-    'techsupport': 'no_internet_service',
-    'streamingtv':  'no_internet_service',
-    'streamingmovies': 'no_internet_service',
-    'contract': 'two_year',
-    'paperlessbilling': 'yes',
-    'paymentmethod': 'credit_card_(automatic)',
-    'monthlycharges': 5.0,
-    'totalcharges': 340.0,
-    'churn':   0
-}
+app = Flask('churn')
 
-X = dv.transform([customer])
-y_pred = model.predict_proba(X)[0,1]
+@app.route('/predict', methods=['POST'])
 
-print('input', customer)
-print('churn probability', y_pred)
+def predict (customer):
+    X = dv.transform([customer])
+    y_pred = model.predict_proba(X)[0,1]
+    return y_pred
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=9696)
